@@ -1,0 +1,33 @@
+const log = require('logToConsole');
+const isConsentGranted = require('isConsentGranted');
+const callInWindow = require('callInWindow');
+const addConsentListener = require('addConsentListener');
+
+const sendClarityConsent = () => {
+  const adStorageGranted = isConsentGranted('ad_storage') ? 'granted' : 'denied';
+  const analyticsStorageGranted = isConsentGranted('analytics_storage') ? 'granted' : 'denied';
+
+  const consentData = {
+    ad_Storage: adStorageGranted,
+    analytics_Storage: analyticsStorageGranted,
+  };
+
+  log('Sending consent data to Clarity:', consentData);
+  callInWindow('clarity', 'consentv2', consentData);
+};
+
+// Send initial consent state
+sendClarityConsent();
+
+// Listen for future consent changes
+addConsentListener('ad_storage', () => {
+  log('ad_storage consent state changed.');
+  sendClarityConsent();
+});
+
+addConsentListener('analytics_storage', () => {
+  log('analytics_storage consent state changed.');
+  sendClarityConsent();
+});
+
+data.gtmOnSuccess();
